@@ -1,13 +1,18 @@
+from mininet.net import Mininet
 from mininet.node import Node
 from mininet.link import Link
 from mininet.log import setLogLevel, info
 from mininet.util import quietRun
+import subprocess
 
 from time import sleep
 
 def default_network(cname='controller', cargs='-v ptcp:' ):
     """Create the surfnet test topology from scratch"""
     CONTROLLER_IP = '192.168.1.135'
+    info('*** Cleaning any bridges and interfaces already present')
+    subprocess.call("clean-ifaces.sh", shell=True)
+
     info('*** Creating Nodes\n')
     controller = Node('opendaylight', inNamespace=False)
     pe1 = Node('PE1', inNamespace=False)
@@ -70,5 +75,6 @@ def default_network(cname='controller', cargs='-v ptcp:' ):
 
 if __name__ == '__main__':
     setLogLevel('info')
+    Mininet.init()
     default_network()
     #topos = { 'mytopo': ( lambda: MyTopo() ) }
