@@ -10,26 +10,36 @@ from time import sleep
 def default_network(cname='controller', cargs='-v ptcp:' ):
     """Create the surfnet test topology from scratch"""
     CONTROLLER_IP = '192.168.1.135'
+    DEFAULT_IP = '192.168.1.30'
     info('*** Cleaning any bridges and interfaces already present')
     subprocess.call("clean-ifaces.sh", shell=True)
 
     info('*** Creating Nodes\n')
     controller = Node('opendaylight', inNamespace=False)
-    pe1 = Node('PE1', inNamespace=False)
-    pe2 = Node('PE2', inNamespace=False)
-    pe3 = Node('PE3', inNamespace=False)
-    p1 = Node('P1', inNamespace=False)
-    p2 = Node('P2', inNamespace=False)
+    pe1 = Node('PE1', cls=LinuxRouter)
+    pe2 = Node('PE2', cls=LinuxRouter)
+    pe3 = Node('PE3', cls=LinuxRouter)
+    p1 = Node('P1', cls=LinuxRouter)
+    p2 = Node('P2', cls=LinuxRouter)
     net1 = Node('net1')
     net2 = Node('net2')
 
     info('*** Creating links\n')
-    Link(pe1, p1)
+#    addLink( s1, router, intfName2='r0-eth1',
+#                      params2={ 'ip' : defaultIP } )  # for clarity
+#        self.addLink( s2, router, intfName2='r0-eth2',
+#                      params2={ 'ip' : '172.16.0.1/12' } )
+#        self.addLink( s3, router, intfName2='r0-eth3',
+#                      params2={ 'ip' : '10.0.0.1/8' } )
+
+    Link(net1, pe1, intfName2='PE1-eth0',
+         params2={ 'ip' : '192.168.200.1/24' } )
+    Link(net2, pe2)
     Link(p1, p2)
+    Link(pe1, p1, intfName2='r0-eth1',
+         params2={ 'ip' : defaultIP } )
     Link(p2, pe2)
     Link(p2, pe3)
-    Link(net1, pe1)
-    Link(net2, pe2)
 
     info("*** Configuring hosts\n")
     net1.setIP('192.168.200.2/24')
@@ -39,15 +49,15 @@ def default_network(cname='controller', cargs='-v ptcp:' ):
 
     info("*** Starting network using Open vSwitch\n")
     controller.cmd(cname + ' ' + cargs + '&')
-    pe1.cmd('ovs-vsctl del-br dp0')
+    pe1.cmd('ovs-vsctl del-br br0')
     pe1.cmd('ovs-vsctl add-br br0')
-    pe2.cmd('ovs-vsctl del-br dp0')
+    pe2.cmd('ovs-vsctl del-br br1')
     pe2.cmd('ovs-vsctl add-br br1')
-    pe3.cmd('ovs-vsctl del-br dp0')
+    pe3.cmd('ovs-vsctl del-br br2')
     pe3.cmd('ovs-vsctl add-br br2')
-    p1.cmd('ovs-vsctl del-br dp0')
+    p1.cmd('ovs-vsctl del-br br3')
     p1.cmd('ovs-vsctl add-br br3')
-    p2.cmd('ovs-vsctl del-br dp0')
+    p2.cmd('ovs-vsctl del-br br4')
     p2.cmd('ovs-vsctl add-br br4')
     for intf in pe1.intfs.values():
         print pe1.cmd('ovs-vsctl add-port br0 %s' % intf)
@@ -72,6 +82,18 @@ def default_network(cname='controller', cargs='-v ptcp:' ):
         sleep( 1 )
         info( '.' )
     info( '\n' )
+
+class LinuxRouter( Node ):
+    "A Node with IP forwarding enabled."
+
+    def config(self, **params):
+        super(LinuxRouter, self).config(**params)
+        # Enable forwarding on the router
+        self.cmd('sysctl net.ipv4.ip_forward=1')
+
+    def terminate(self ):
+        self.cmd('sysctl net.ipv4.ip_forward=0')
+        super(LinuxRouter, self).terminate()
 
 if __name__ == '__main__':
     setLogLevel('info')
