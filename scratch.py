@@ -2,8 +2,9 @@ from mininet.node import Node
 from mininet.link import Link
 from mininet.log import setLogLevel, info
 
-def default_network():
+def default_network(cname='controller', cargs='-v ptcp:' ):
     """Create the surfnet test topology from scratch"""
+    CONTROLLER_IP = '192.168.1.30'
     info('*** Creating Nodes\n')
     controller = Node('opendaylight', inNamespace=False)
     pe1 = Node('PE1', inNamespace=False)
@@ -22,15 +23,33 @@ def default_network():
     Link(net1, pe1)
     Link(net2, pe2)
 
-    info( "*** Configuring hosts\n" )
+    info("*** Configuring hosts\n")
     net1.setIP('192.168.200.2/24')
     net2.setIP('192.168.250.2/24')
     info(str(net1) + '\n')
     info(str(net2) + '\n')
 
-    info( "*** Starting network using Open vSwitch\n" )
+    info("*** Starting network using Open vSwitch\n")
+    controller.cmd(cname + ' ' + cargs + '&')
+    pe1.cmd('ovs-vsctl del-br dp0')
+    pe1.cmd('ovs-vsctl add-br dp0')
+    pe2.cmd('ovs-vsctl del-br dp0')
+    pe2.cmd('ovs-vsctl add-br dp0')
+    pe3.cmd('ovs-vsctl del-br dp0')
+    pe3.cmd('ovs-vsctl add-br dp0')
+    p1.cmd('ovs-vsctl del-br dp0')
+    p1.cmd('ovs-vsctl add-br dp0')
+    p2.cmd('ovs-vsctl del-br dp0')
+    p2.cmd('ovs-vsctl add-br dp0')
+
+    info('*** Setting controller on all the switches')
+    pe1.cmd('ovs-vsctl set-controller dp0 tcp:'+CONTROLLER_IP+':6633')
+    pe2.cmd('ovs-vsctl set-controller dp0 tcp:'+CONTROLLER_IP+':6633')
+    pe3.cmd('ovs-vsctl set-controller dp0 tcp:'+CONTROLLER_IP+':6633')
+    p1.cmd('ovs-vsctl set-controller dp0 tcp:'+CONTROLLER_IP+':6633')
+    p2.cmd('ovs-vsctl set-controller dp0 tcp:'+CONTROLLER_IP+':6633')
 
 if __name__ == '__main__':
-    setLogLevel( 'info' )
+    setLogLevel('info')
     default_network()
     #topos = { 'mytopo': ( lambda: MyTopo() ) }
