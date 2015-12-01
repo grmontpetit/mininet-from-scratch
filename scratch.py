@@ -1,58 +1,36 @@
-from mininet.net import Mininet
-from mininet.topo import LinearTopo
 from mininet.node import Node
+from mininet.link import Link
 from mininet.log import setLogLevel, info
 
-#tree4 = TreeTopo(depth=2,fanout=2)
-#net = Mininet(topo=tree4)
-#net.start()
-#h1, h4  = net.hosts[0], net.hosts[3]
-#print h1.cmd('ping -c1 %s' % h4.IP())
-#net.stop()
-
-def emptyNet():
-    # Create a linear topology with 4 switches with 1 host per switches
-    linear = LinearTopo(k=4, n=1)
-#    net = Mininet(controller=remote_controller,
-#                  switch=OVSKernelSwitch, link=TCLink)
-    net = Mininet(topo=linear)
-    controller = net.addController('opendaylight',
-                                   controller=remote_controller,
-                                   # replace this IP with the IP on your network
-                                   ip="192.168.1.60",
-                                   port=6633)
-
-    h1 = net.addHost( 'h1' )
-    h2 = net.addHost( 'h2' )
-
-    s1 = net.addSwitch( 's1' , mac='00:00:00:00:00:01' )
-    s2 = net.addSwitch( 's2' , mac='00:00:00:00:00:02' )
-
-    net.addLink('s1','s2')
-    net.addLink('s2','s1')
-
-    net.addLink('s1','h1')
-    net.addLink('s2','h2')
-
-
-    s1.start(c1)
-    s2.start(c1)
-    s3.start(c1)
-    net.start()
-    net.staticArp()
-    CLI( net )
-    net.stop()
- if __name__ == '__main__':
-  setLogLevel( 'info' )
-  emptyNet()
-topos = { 'mytopo': ( lambda: MyTopo() ) }
-
-def surfnet():
+def default_network():
     """Create the surfnet test topology from scratch"""
-    info('Creating Nodes\n'')
+    info('*** Creating Nodes\n')
     controller = Node('opendaylight', inNamespace=False)
     pe1 = Node('PE1', inNamespace=False)
     pe2 = Node('PE2', inNamespace=False)
     pe3 = Node('PE3', inNamespace=False)
     p1 = Node('P1', inNamespace=False)
     p2 = Node('P2', inNamespace=False)
+    net1 = Node('net1')
+    net2 = Node('net2')
+
+    info('*** Creating links\n')
+    Link(pe1, p1)
+    Link(p1, p2)
+    Link(p2, pe2)
+    Link(p2, pe3)
+    Link(net1, pe1)
+    Link(net2, pe2)
+
+    info( "*** Configuring hosts\n" )
+    net1.setIP('192.168.200.2/24')
+    net2.setIP('192.168.250.2/24')
+    info(str(net1) + '\n')
+    info(str(net2) + '\n')
+
+    info( "*** Starting network using Open vSwitch\n" )
+
+if __name__ == '__main__':
+    setLogLevel( 'info' )
+    default_network()
+    #topos = { 'mytopo': ( lambda: MyTopo() ) }
