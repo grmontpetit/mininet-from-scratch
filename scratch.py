@@ -7,6 +7,7 @@ import subprocess
 
 from time import sleep
 
+
 def default_network(cname='controller', cargs='-v ptcp:' ):
     """Create the surfnet test topology from scratch"""
     CONTROLLER_IP = '192.168.1.135'
@@ -25,21 +26,41 @@ def default_network(cname='controller', cargs='-v ptcp:' ):
     net2 = Node('net2')
 
     info('*** Creating links\n')
-#    addLink( s1, router, intfName2='r0-eth1',
-#                      params2={ 'ip' : defaultIP } )  # for clarity
-#        self.addLink( s2, router, intfName2='r0-eth2',
-#                      params2={ 'ip' : '172.16.0.1/12' } )
-#        self.addLink( s3, router, intfName2='r0-eth3',
-#                      params2={ 'ip' : '10.0.0.1/8' } )
 
+    # PE1:1
     Link(net1, pe1, intfName2='PE1-eth0',
-         params2={ 'ip' : '192.168.200.1/24' } )
-    Link(net2, pe2)
-    Link(p1, p2)
-    Link(pe1, p1, intfName2='r0-eth1',
-         params2={ 'ip' : defaultIP } )
-    Link(p2, pe2)
-    Link(p2, pe3)
+         params2={'ip': '192.168.200.1/24'})
+    # PE1:2
+    Link(p1, pe1, intfName2='PE1-eth1',
+         params2={'ip': '172.16.0.1/24'})
+
+    # PE1 --> P1
+    Link(pe1, p1, intfName2='P1-eth0',
+         params2={'ip': '172.16.0.2/24'})
+    # P2  --> P1
+    Link(p2, p1, intfName2='P1-eth1',
+         params2={'ip': '172.17.0.1/24'})
+
+    # P1 -->  P2
+    Link(p1, p2, intfName2='P2-eth0',
+         params2={'ip': '172.17.0.2/24'})
+    # PE2 --> P2
+    Link(pe2, p2, intfName2='P2-eth1',
+         params2={'ip': '172.18.0.1/24'})
+    # PE3 --> P2
+    Link(pe3, p2, intfName2='P2-eth2',
+         params2={'ip': '172.19.0.1/24'})
+
+    # P2 --> PE3
+    Link(p2, pe3, intfName2='PE3-eth0',
+         params2={'ip': '172.19.0.2/24'})
+
+    # P2 --> PE2
+    Link(p2, pe2, intfName2='PE2-eth0',
+         params2={'ip': '172.18.0.2/24'})
+    # Net2 --> PE2
+    Link(net2, pe2, intfName2='PE2-eth2',
+         params2={'ip': '192.168.250.1/24'})
 
     info("*** Configuring hosts\n")
     net1.setIP('192.168.200.2/24')
@@ -83,8 +104,9 @@ def default_network(cname='controller', cargs='-v ptcp:' ):
         info( '.' )
     info( '\n' )
 
-class LinuxRouter( Node ):
-    "A Node with IP forwarding enabled."
+
+class LinuxRouter(Node):
+    """A Node with IP forwarding enabled."""
 
     def config(self, **params):
         super(LinuxRouter, self).config(**params)
