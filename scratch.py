@@ -3,6 +3,8 @@ from mininet.node import Node
 from mininet.link import Link
 from mininet.log import setLogLevel, info
 from mininet.util import quietRun
+from mininet.cli import CLI
+
 import subprocess
 
 from time import sleep
@@ -99,8 +101,16 @@ class LinuxRouter(Node):
         self.cmd('sysctl net.ipv4.ip_forward=0')
         super(LinuxRouter, self).terminate()
 
+def run():
+    """Mininet from scratch"""
+    #Mininet.init()
+    topo = default_network()
+    net = Mininet(topo=topo)  # controller is used by s1-s3
+    net.start()
+    info('*** Routing Table on Router:\n')
+    CLI(net)
+    net.stop()
+
 if __name__ == '__main__':
     setLogLevel('info')
-    Mininet.init()
-    default_network()
-    #topos = { 'mytopo': ( lambda: MyTopo() ) }
+    run()
