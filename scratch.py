@@ -31,33 +31,15 @@ def default_network(cname='controller', cargs='-v ptcp:' ):
     Link(net1, pe1, intfName2='PE1-eth0',
          params2={'ip': '192.168.200.1/24'})
     # PE1:2
-    Link(p1, pe1, intfName2='PE1-eth1',
-         params2={'ip': '172.16.0.1/24'})
+    Link(p1, pe1)
 
-    # PE1 --> P1
-    Link(pe1, p1, intfName2='P1-eth0',
-         params2={'ip': '172.16.0.2/24'})
-    # P2  --> P1
-    Link(p2, p1, intfName2='P1-eth1',
-         params2={'ip': '172.17.0.1/24'})
+    # P1 <-->  P2
+    Link(p1, p2)
+    # PE2 <--> P2
+    Link(pe2, p2)
+    # PE3 <--> P2
+    Link(pe3, p2)
 
-    # P1 -->  P2
-    Link(p1, p2, intfName2='P2-eth0',
-         params2={'ip': '172.17.0.2/24'})
-    # PE2 --> P2
-    Link(pe2, p2, intfName2='P2-eth1',
-         params2={'ip': '172.18.0.1/24'})
-    # PE3 --> P2
-    Link(pe3, p2, intfName2='P2-eth2',
-         params2={'ip': '172.19.0.1/24'})
-
-    # P2 --> PE3
-    Link(p2, pe3, intfName2='PE3-eth0',
-         params2={'ip': '172.19.0.2/24'})
-
-    # P2 --> PE2
-    Link(p2, pe2, intfName2='PE2-eth0',
-         params2={'ip': '172.18.0.2/24'})
     # Net2 --> PE2
     Link(net2, pe2, intfName2='PE2-eth2',
          params2={'ip': '192.168.250.1/24'})
