@@ -52,18 +52,15 @@ def default_network(cname='controller', cargs='-v ptcp:' ):
     info(str(net1) + '\n')
     info(str(net2) + '\n')
 
-    info("*** Starting network using Open vSwitch\n")
+    info("*** Setting up Bridges\n")
     controller.cmd(cname + ' ' + cargs + '&')
-    pe1.cmd('ovs-vsctl del-br br0')
     pe1.cmd('ovs-vsctl add-br br0')
-    pe2.cmd('ovs-vsctl del-br br1')
     pe2.cmd('ovs-vsctl add-br br1')
-    pe3.cmd('ovs-vsctl del-br br2')
     pe3.cmd('ovs-vsctl add-br br2')
-    p1.cmd('ovs-vsctl del-br br3')
     p1.cmd('ovs-vsctl add-br br3')
-    p2.cmd('ovs-vsctl del-br br4')
     p2.cmd('ovs-vsctl add-br br4')
+
+    info('*** Creating termination points')
     for intf in pe1.intfs.values():
         print pe1.cmd('ovs-vsctl add-port br0 %s' % intf)
     for intf in pe2.intfs.values():
