@@ -10,7 +10,7 @@ import subprocess
 from time import sleep
 
 
-def default_network(cname='controller', cargs='-v ptcp:' ):
+def default_network(Topo):
     """Create the surfnet test topology from scratch"""
     CONTROLLER_IP = '192.168.1.135'
     DEFAULT_IP = '192.168.1.30'
@@ -53,7 +53,6 @@ def default_network(cname='controller', cargs='-v ptcp:' ):
     info(str(net2) + '\n')
 
     info("*** Setting up Bridges\n")
-    controller.cmd(cname + ' ' + cargs + '&')
     pe1.cmd('ovs-vsctl add-br br0')
     pe2.cmd('ovs-vsctl add-br br1')
     pe3.cmd('ovs-vsctl add-br br2')
@@ -100,11 +99,11 @@ class LinuxRouter(Node):
 
 def run():
     """Mininet from scratch"""
-    #Mininet.init()
+    Mininet.init()
     topo = default_network()
     net = Mininet(topo=topo)  # controller is used by s1-s3
     net.start()
-    info('*** Routing Table on Router:\n')
+    info('*** Starting mininet CLI\n')
     CLI(net)
     net.stop()
 
