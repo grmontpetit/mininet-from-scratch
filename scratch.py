@@ -99,13 +99,14 @@ class LinuxRouter(Node):
 
 def run():
     """Mininet from scratch"""
-    Mininet.init()
-    topo = default_network()
-    net = Mininet(topo=topo)  # controller is used by s1-s3
-    net.start()
-    info('*** Starting mininet CLI\n')
-    CLI(net)
-    net.stop()
+    #Mininet.init()
+    topos = {'mytopo': (lambda: default_network())}
+    #topo = default_network()
+    #net = Mininet(topo=topo)  # controller is used by s1-s3
+    #net.start()
+    #info('*** Starting mininet CLI\n')
+    #CLI(net)
+    #net.stop()
 
 if __name__ == '__main__':
     setLogLevel('info')
